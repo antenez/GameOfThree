@@ -1,0 +1,43 @@
+Game of Three ‐ Coding Challenge
+
+Goal
+The Goal is to implement a game with two independent units – the players – communicating with each other using an API.
+Description
+When a player starts, it incepts a random (whole) number and sends it to the second player as an approach of starting the game.
+The receiving player can now always choose between adding one of {­1, 0, 1}to get to a number that is divisible by 3. Divide it by three. The resulting whole number is
+then sent back to the original sender. The same rules are applied until one player reaches the number 1(after the division).
+See example below.
+
+For initial 65 sent to player 2, player two play +1, return 57/3=19
+Player 1 play -1, sent 18/3=6
+Player 2 play +0 sent 6/3=2
+Player one play +1, and 2+1 = 3 /3 =1 and he win game.
+
+For each "move", a sufficient output should get generated (mandatory: the added, and
+the resulting number).
+
+Both players should be able to play automatically without user input. One of the players
+should optionally be adjustable by a user.
+
+Notes
+● Each player runs on its own (independent programs, two browsers, web‐workers,...).
+● Communication via an API (REST, Sockets, WebRTC, ...).
+● A player may not be available when the other one starts.
+● If you are applying for a frontend position, think of a fancy easily configurable layout. Otherwise terminal output is okay.
+● Please share your project on GitHub and send us the link.
+● Try to be platform independent, in other words the project must be runnable
+easily in every environment.
+
+========================================================
+Services are implemented.
+
+mvn install is working. 
+Additionally you can run service by using spring-boot:run command. This will run in memory tomcat instance and services become available on localhost:8080
+
+In test package you can find GameOfThreeGameControllerImplTest:
+	It covers one game setup part and one full game with moves.
+	
+GameOfThreeGameControllerImpl is planned as main game controller. an be injected as a Service annotated Spring class. Main purpose is to control other in memory games according to requirements and game rules.	
+ba.enox.codesample.gameofthree.api.GameOfThreeRestAPIController can be used to wrap implementation with restful api	
+	
+Best Regards,Eno.
