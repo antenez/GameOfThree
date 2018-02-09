@@ -16,7 +16,9 @@ import ba.enox.codesample.gameofthree.interfaces.GameOfThreeStepResponse;
  */
 public class GameOfThreeGameImpl implements GameOfThreeGame {
 
-	private GameOfThreePlayer[] players = new GameOfThreePlayer[2];
+	//private GameOfThreePlayer[] players = new GameOfThreePlayer[2];
+	GameOfThreePlayer playerOne;
+	GameOfThreePlayer playerTwo;
 	private String gameName;
 	private int playedStepCounter = 0;
 	private int gameState;
@@ -27,7 +29,7 @@ public class GameOfThreeGameImpl implements GameOfThreeGame {
 			throw new IllegalArgumentException("Initial step should be higher then 4!");
 		}
 		this.gameState = initialStep;
-		this.players[0] = initialPlayer;
+		this.playerOne = initialPlayer;
 		this.gameName = gameName;
 		playedStepCounter++;// To start game
 	}
@@ -74,10 +76,10 @@ public class GameOfThreeGameImpl implements GameOfThreeGame {
 	 */
 	@Override
 	public void addPlayerToGame(GameOfThreePlayer playerToAddToGame) throws IllegalArgumentException {
-		if (this.players[1] != null) {
-			throw new IllegalArgumentException("game has already two players");
+		if (this.playerTwo != null) {
+			throw new IllegalArgumentException("Game has already two players");
 		}
-		players[1] = playerToAddToGame;
+		playerTwo = playerToAddToGame;
 	}
 
 	/*
@@ -96,7 +98,7 @@ public class GameOfThreeGameImpl implements GameOfThreeGame {
 	}
 
 	public GameOfThreePlayer getPreviousPlayer() {
-		return players[(this.playedStepCounter - 1) % this.players.length];
+		return ((this.playedStepCounter - 1) % 2 == 0) ? this.playerOne : playerTwo ;
 	}
 
 	/*
@@ -107,7 +109,7 @@ public class GameOfThreeGameImpl implements GameOfThreeGame {
 	 */
 	@Override
 	public GameOfThreePlayer getCurrentPlayer() {
-		return players[this.playedStepCounter % this.players.length];
+		return (this.playedStepCounter % 2 == 0) ? this.playerOne : playerTwo ;
 	}
 
 	/*
@@ -198,16 +200,30 @@ public class GameOfThreeGameImpl implements GameOfThreeGame {
 	 */
 	@Override
 	public boolean verifyPlayerForGame(GameOfThreePlayer player) {
-		for (GameOfThreePlayer gamePlayer : this.players) {
-			if (gamePlayer != null && gamePlayer.getName().equals(player.getName()))
-				return true;
-		}
-		return false;
+		if (this.playerOne.getName().equals(player.getName()) || this.playerOne.getName().equals(player.getName())) return true;
+		else return false;
 	}
 
 	@Override
 	public int getCurrentGameState() {
 		return this.gameState;
 	}
+
+	@Override
+	public GameOfThreePlayer getPlayerOne() {
+		return this.getPlayerOne();
+	}
+
+	@Override
+	public GameOfThreePlayer setPlayerTwo(GameOfThreePlayer playerTwo) {
+		return this.playerTwo = playerTwo;
+	}
+
+	@Override
+	public GameOfThreePlayer getPlayerTwo() {
+		return this.playerTwo;
+	}
+
+
 
 }

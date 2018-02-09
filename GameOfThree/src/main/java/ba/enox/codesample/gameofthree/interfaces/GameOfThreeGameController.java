@@ -14,6 +14,16 @@ public interface GameOfThreeGameController {
 	 * @return List Of game names strings to access
 	 */
 	public Set<String> getGameOfThreeGameNamesToAccess();
+	
+	/**
+	 * Add new GameOfThree to controler and enable acces functionalities trough
+	 * controller to it
+	 * 
+	 * @param game game to create
+	 * @throws IllegalArgumentException
+	 */
+	public void createNewGame(GameOfThreeGame game)
+			throws IllegalArgumentException;
 
 	/**
 	 * Add new GameOfThree to controler and enable acces functionalities trough
@@ -24,7 +34,6 @@ public interface GameOfThreeGameController {
 	 * @param playerToAdd
 	 * @param initialStep
 	 *            if null it will be generated randomly //TODO clarify this
-	 * @return creation successs true false
 	 * @throws IllegalArgumentException
 	 */
 	public void createNewGame(String newGameName, GameOfThreePlayer playerToAdd, Integer initialStep)

@@ -7,7 +7,28 @@ import java.util.List;
  *
  */
 public interface GameOfThreeGame {
-
+	
+	
+	/**
+	 * Player one should be initialize trough  constructor
+	 * This is just getter method
+	 * @return
+	 */
+	public GameOfThreePlayer getPlayerOne();
+	
+	/**
+	 * Set player Two
+	 * @param playerTwo
+	 * @return
+	 */
+	public GameOfThreePlayer setPlayerTwo(GameOfThreePlayer playerTwo);
+	
+	/**
+	 * GetPlayer Two
+	 * @return
+	 */
+	public GameOfThreePlayer getPlayerTwo();
+	
 	/**
 	 * Set actual name for game used to access
 	 * 
