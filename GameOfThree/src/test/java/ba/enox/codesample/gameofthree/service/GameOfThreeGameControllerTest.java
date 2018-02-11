@@ -14,24 +14,22 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.stereotype.Service;
 
-import ba.enox.codesample.gameofthree.interfaces.GameOfThreeGame;
-import ba.enox.codesample.gameofthree.interfaces.GameOfThreeGameController;
-import ba.enox.codesample.gameofthree.interfaces.GameOfThreePlayer;
-import ba.enox.codesample.gameofthree.interfaces.GameOfThreeStepResponse;
-import ba.enox.codesample.gameofthree.model.GameOfThreeGameImpl;
-import ba.enox.codesample.gameofthree.model.GameOfThreePlayerImpl;
+import ba.enox.codesample.gameofthree.model.GameOfThreeGame;
+import ba.enox.codesample.gameofthree.model.GameOfThreePlayer;
+import ba.enox.codesample.gameofthree.model.GameOfThreeStepResponse;
 
 /**
  * @author eno.ahmedspahic
  *
  */
 @Service
-public class GameOfThreeGameControllerImplTest {
+public class GameOfThreeGameControllerTest {
 
 	// Common shared instances for test casses
 	String myNotExistingGameName = "NOT_EXISTING_GAME_NAME";
-	GameOfThreePlayer myGameNotRegisteredPlayer = new GameOfThreePlayerImpl("NOT_REGISTERED_PLAYER");
-	GameOfThreeGame myGameNotExisting = new GameOfThreeGameImpl(myGameNotRegisteredPlayer, myNotExistingGameName, 100);
+	GameOfThreePlayer myGameNotRegisteredPlayer = new GameOfThreePlayer("NOT_REGISTERED_PLAYER", false);
+	GameOfThreeGame myGameNotExisting = new GameOfThreeGame(myGameNotRegisteredPlayer, null, myNotExistingGameName,
+			100);
 
 	/*
 	 * Test is game configured according to input parameters. Field size Number
@@ -39,10 +37,14 @@ public class GameOfThreeGameControllerImplTest {
 	 */
 	@Test
 	public void testSetupGame() {
-		GameOfThreeGameController gameController = new GameOfThreeGameControllerImpl();
+		GameOfThreeService gameController = new GameOfThreeService();
 		String myGameOneName = "myGameOne";
-		GameOfThreePlayer myGameOneNamePlayer = new GameOfThreePlayerImpl("EnoPlayer");
-		gameController.createNewGame(myGameOneName, myGameOneNamePlayer, 5);
+		GameOfThreePlayer playerOne = new GameOfThreePlayer("EnoPlayer", false);
+		GameOfThreeGame game =  new GameOfThreeGame(null, null, myGameOneName, 5);
+		game.addPlayerToGame(playerOne);
+		gameController.createNewGame(game);
+		
+		
 
 		List<String> expectedGameNames = new ArrayList<>();
 		expectedGameNames.add(myGameOneName);
@@ -64,20 +66,20 @@ public class GameOfThreeGameControllerImplTest {
 		}
 
 		try {
-			myGameOne = gameController.getGameOfThreeGameByNameForRegisteredPlayer(myGameOneNamePlayer,
+			myGameOne = gameController.getGameOfThreeGameByNameForRegisteredPlayer(playerOne,
 					myNotExistingGameName);
 			fail("This should fail because not existing game in controller!");
 		} catch (IllegalArgumentException e) {
 			Assert.assertEquals("Game with key name " + myNotExistingGameName + " does not exists!", e.getMessage());
 		}
 
-		myGameOne = gameController.getGameOfThreeGameByNameForRegisteredPlayer(myGameOneNamePlayer, myGameOneName);
+		myGameOne = gameController.getGameOfThreeGameByNameForRegisteredPlayer(playerOne, myGameOneName);
 		Assert.assertNull(
 				"After first step next player should be == null  because it is not still registered on this line",
 				myGameOne.getCurrentPlayer());
 
 		// Register player two
-		GameOfThreePlayer myGameOneNamePlayerTwo = new GameOfThreePlayerImpl("SecondPlayer");
+		GameOfThreePlayer myGameOneNamePlayerTwo = new GameOfThreePlayer("SecondPlayer", false);
 		gameController.registerPlayerToGame(myGameOneNamePlayerTwo, myGameOneName);
 		Assert.assertEquals(
 				"Current player should be second registered player after initial first step from player one!",
@@ -88,12 +90,14 @@ public class GameOfThreeGameControllerImplTest {
 	@Test
 	public void testGameLogic() {
 
-		GameOfThreeGameController gameController = new GameOfThreeGameControllerImpl();
+		GameOfThreeService gameController = new GameOfThreeService();
 		String myGameOneName = "myGameOne";
-		GameOfThreePlayer myGamePlayerOne = new GameOfThreePlayerImpl("PlayerOne");
-		gameController.createNewGame(myGameOneName, myGamePlayerOne, 56);
+		GameOfThreePlayer myGamePlayerOne = new GameOfThreePlayer("PlayerOne", false);
+		GameOfThreeGame game = new GameOfThreeGame(null, null, myGameOneName, 56);
+		game.addPlayerToGame(myGamePlayerOne);
+		gameController.createNewGame(game);
 		// adding player two to game
-		GameOfThreePlayer myGamePlayerTwo = new GameOfThreePlayerImpl("SecondPlayer");
+		GameOfThreePlayer myGamePlayerTwo = new GameOfThreePlayer("SecondPlayer", false);
 		gameController.registerPlayerToGame(myGamePlayerTwo, myGameOneName);
 
 		GameOfThreeGame myGame = gameController.getGameOfThreeGameByNameForRegisteredPlayer(myGamePlayerOne,
@@ -154,9 +158,9 @@ public class GameOfThreeGameControllerImplTest {
 		// requirements
 		Assert.assertEquals("Player is not expected ", expectedNextPlayerName, myGame.getCurrentPlayer().getName());
 		Assert.assertEquals(
-				"Invalid step proposal " + expectedNextStepProposal + " but proposals are "
-						+ Arrays.toString(myGame.getValidStepProposal().toArray()),
-				true, myGame.getValidStepProposal().contains(expectedNextStepProposal));
+				"Invalid step proposal " + expectedNextStepProposal + " but proposals is "
+						+ myGame.getValidStepProposal(),
+						expectedNextStepProposal, myGame.getValidStepProposal());
 		Assert.assertEquals("Game is not over jet ", expectedGameOverState, myGame.isGameOver());
 		Assert.assertEquals("Game state is not as expected ", expectedGameState, myGame.getCurrentGameState());
 	}
