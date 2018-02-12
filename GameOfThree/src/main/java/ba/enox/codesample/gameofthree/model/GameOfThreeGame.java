@@ -3,8 +3,6 @@
  */
 package ba.enox.codesample.gameofthree.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -18,18 +16,28 @@ public class GameOfThreeGame {
 	private String gameName;
 	private int playedStepCounter = 0;
 	private int gameState;
+	
+	public GameOfThreeGame(){
+		this(null, null, "", null);
+	}
 
+	/**
+	 * Constructor for game
+	 * If state is 0 it will start with random number.
+	 * @param playerOne
+	 * @param playerTwo
+	 * @param gameName
+	 * @param initialStep if it is 0, random step will be generated
+	 * @throws IllegalArgumentException if initial step value is < 4
+	 */
 	public GameOfThreeGame(GameOfThreePlayer playerOne, GameOfThreePlayer playerTwo, String gameName,
 			Integer initialStep) throws IllegalArgumentException {
-		if (initialStep < 4) {
-			throw new IllegalArgumentException("Initial step should be higher then 4!");
-		}
 
-		this.playerOne = playerOne;
-		this.playerTwo = playerTwo;
-		this.gameName = gameName;
-
-		if (null != initialStep) {
+		System.out.println("++++ initial step "+initialStep);
+		if (0 != initialStep) {
+			if (initialStep < 4) {
+				throw new IllegalArgumentException("Initial step should be higher then 4!");
+			}
 			this.gameState = initialStep;
 		} else {
 			Random r = new Random();
@@ -37,6 +45,10 @@ public class GameOfThreeGame {
 			int High = Integer.MAX_VALUE;
 			this.gameState = r.nextInt(High - Low) + Low;
 		}
+		
+		this.playerOne = playerOne;
+		this.playerTwo = playerTwo;
+		this.gameName = gameName;
 
 		playedStepCounter++;// To start game
 
@@ -62,7 +74,8 @@ public class GameOfThreeGame {
 	}
 
 	public String getCurrentPlayerName() {
-		return getCurrentPlayer().getName();
+		GameOfThreePlayer p = getCurrentPlayer();
+		return p.getName();
 	}
 
 	public String getPreviousPlayerName() {
@@ -75,6 +88,16 @@ public class GameOfThreeGame {
 
 	public GameOfThreePlayer getCurrentPlayer() {
 		return (this.playedStepCounter % 2 == 0) ? this.playerOne : playerTwo;
+	}
+	
+	public GameOfThreePlayer getPlayerByName(String playerName) throws IllegalArgumentException {
+		if(playerOne != null && playerName.equals(playerOne.getName())){
+			return playerOne;
+		}else if(playerTwo != null && playerName.equals(playerTwo.getName())){
+			return playerTwo;
+		}else{
+			throw new  IllegalArgumentException("Player:"+playerName+" is not part of game:" + this.getGameName()+"!");
+		}
 	}
 
 	public GameOfThreeStepResponse playNext(GameOfThreePlayer player, int playStep)
@@ -95,7 +118,7 @@ public class GameOfThreeGame {
 		this.gameState = (this.gameState + playStep) / 3;
 		playedStepCounter++;
 
-		return new ba.enox.codesample.gameofthree.model.GameOfThreeStepResponse(playStep, this.gameState);
+		return new ba.enox.codesample.gameofthree.model.GameOfThreeStepResponse(player.getName(), playStep, this.gameState);
 	}
 
 	public boolean validateStep(int stepToValidate) {

@@ -3,12 +3,19 @@
  */
 package ba.enox.codesample.gameofthree.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import ba.enox.codesample.gameofthree.model.GameOfThreeGame;
 import ba.enox.codesample.gameofthree.model.GameOfThreePlayer;
+import ba.enox.codesample.gameofthree.model.GameOfThreeStepResponse;
 
 /**
  * @author eno.ahmedspahic GameOfThreeService is planned o be used as central
@@ -22,6 +29,9 @@ import ba.enox.codesample.gameofthree.model.GameOfThreePlayer;
  */
 @Service(value = "GameOfThreeService")
 public class GameOfThreeService {
+	
+	private final Logger LOG = LoggerFactory.getLogger(GameOfThreeService.class);
+	
 	Map<String, GameOfThreeGame> createdGames;
 
 	public GameOfThreeService() {
@@ -39,11 +49,24 @@ public class GameOfThreeService {
 		}
 		createdGames.put(game.getGameName(), game);
 	}
+	
+	public void deleteGame(String gameName) throws IllegalArgumentException {
+
+		if (!createdGames.containsKey(gameName)) {
+			throw new IllegalArgumentException("Game with key name " + gameName + " does not exists!");
+		}
+		createdGames.remove(gameName);
+	}
 
 	public void registerPlayerToGame(GameOfThreePlayer player, String gameName) throws IllegalArgumentException {
 		if (!createdGames.containsKey(gameName)) {
 			throw new IllegalArgumentException("Game with key name " + gameName + " does not exists!");
 		}
+		
+		if (createdGames.get(gameName).isGameOver()) {
+			throw new IllegalArgumentException("Game with key name " + gameName + " is already completed!");
+		}
+		
 		GameOfThreeGame game = createdGames.get(gameName);
 		if (game.getPlayerOne() == null)
 			game.setPlayerOne(player);
@@ -69,4 +92,41 @@ public class GameOfThreeService {
 
 		return game;
 	}
+	
+	public GameOfThreePlayer getGameOfThreeGamePlayer(String gameName, String playerName)
+			throws IllegalArgumentException {
+
+		if (!createdGames.containsKey(gameName)) {
+			throw new IllegalArgumentException("Game with key name " + gameName + " does not exists!");
+		}
+		GameOfThreeGame game = createdGames.get(gameName);
+		return game.getPlayerByName(playerName);
+	}
+	
+	
+	public List<GameOfThreeStepResponse> playGameStep(GameOfThreePlayer player, Integer step, String gameName)
+			throws IllegalArgumentException {
+		if (!createdGames.containsKey(gameName)) {
+			throw new IllegalArgumentException("Game with key name " + gameName + " does not exists!");
+		}
+		
+		GameOfThreeGame game = createdGames.get(gameName);
+		LOG.info("Play Game {}, state {}, current player {}.",game.getGameName(), game.getCurrentGameState(), game.getCurrentPlayerName());
+		
+		
+		List<GameOfThreeStepResponse> response = new ArrayList<>();
+		response.add(game.playNext(player, step));
+		
+		LOG.info("After PlayeGame next. Play Game {}, state {}, current player {}.",game.getGameName(), game.getCurrentGameState(), game.getCurrentPlayerName());
+		
+		//Play automatic cases
+		while(game.getCurrentPlayer().isAutomaticPlayer() && !game.isGameOver()){
+			response.add(game.playNext(game.getCurrentPlayer(),game.getValidStepProposal()));
+			LOG.info("After PlayeGame next Automatic player. Play Game {}, state {}, current player .",game.getGameName(), game.getCurrentGameState(), game.getCurrentPlayer());
+		}
+		return response;
+	}
+	
+	
+	
 }

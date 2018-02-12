@@ -6,7 +6,6 @@ package ba.enox.codesample.gameofthree.service;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -90,23 +89,23 @@ public class GameOfThreeGameControllerTest {
 	@Test
 	public void testGameLogic() {
 
-		GameOfThreeService gameController = new GameOfThreeService();
+		GameOfThreeService gameService = new GameOfThreeService();
 		String myGameOneName = "myGameOne";
 		GameOfThreePlayer myGamePlayerOne = new GameOfThreePlayer("PlayerOne", false);
 		GameOfThreeGame game = new GameOfThreeGame(null, null, myGameOneName, 56);
 		game.addPlayerToGame(myGamePlayerOne);
-		gameController.createNewGame(game);
+		gameService.createNewGame(game);
 		// adding player two to game
 		GameOfThreePlayer myGamePlayerTwo = new GameOfThreePlayer("SecondPlayer", false);
-		gameController.registerPlayerToGame(myGamePlayerTwo, myGameOneName);
+		gameService.registerPlayerToGame(myGamePlayerTwo, myGameOneName);
 
-		GameOfThreeGame myGame = gameController.getGameOfThreeGameByNameForRegisteredPlayer(myGamePlayerOne,
+		GameOfThreeGame myGame = gameService.getGameOfThreeGameByNameForRegisteredPlayer(myGamePlayerOne,
 				myGameOneName);
 		validateCommonGameOfThreeBehaviour(myGame, myGamePlayerTwo.getName(), 56, 1, false);
 
 		// Play Wrong step
 		try {
-			myGame.playNext(myGamePlayerTwo, -1);
+			gameService.playGameStep(myGamePlayerTwo, -1, myGame.getGameName()) ;  //myGame.playNext(myGamePlayerTwo, -1);
 			fail("-1 is not valid step and it should fail!");
 		} catch (IllegalArgumentException e) {
 			Assert.assertEquals("PlayStep -1 is not alowed!", e.getMessage());
@@ -114,7 +113,7 @@ public class GameOfThreeGameControllerTest {
 
 		// Play Wrong player
 		try {
-			myGame.playNext(myGamePlayerOne, 1);
+			gameService.playGameStep(myGamePlayerOne, 1, myGame.getGameName()) ;  //myGame.playNext(myGamePlayerOne, 1);
 			fail("Game player one is not expected player!It should fail!");
 		} catch (IllegalArgumentException e) {
 			Assert.assertEquals("Expected player for current step is SecondPlayer", e.getMessage());
@@ -122,28 +121,28 @@ public class GameOfThreeGameControllerTest {
 		GameOfThreeStepResponse response;
 
 		// Step from 56 to 19 action =1, next proposal contains -1
-		response = myGame.playNext(myGamePlayerTwo, 1);
+		response = gameService.playGameStep(myGamePlayerTwo, 1, myGame.getGameName()).get(0);   //myGame.playNext(myGamePlayerTwo, 1);
 		validateCommonGameOfThreeBehaviour(myGame, myGamePlayerOne.getName(), 19, -1, false);
-		validateGameOfThreeStepResponse(response, 19, 1);
+		validateGameOfThreeStepResponse(response,myGamePlayerTwo.getName(), 19, 1);
 
 		// step from 19 to 6 action -1 next proposal contains 0
-		response = myGame.playNext(myGamePlayerOne, -1);
+		response = gameService.playGameStep(myGamePlayerOne, -1, myGame.getGameName()).get(0); //myGame.playNext(myGamePlayerOne, -1);
 		validateCommonGameOfThreeBehaviour(myGame, myGamePlayerTwo.getName(), 6, 0, false);
-		validateGameOfThreeStepResponse(response, 6, -1);
+		validateGameOfThreeStepResponse(response,myGamePlayerOne.getName(), 6, -1);
 
 		// step from 6 to 2 action 0 next proposal contains 1
-		response = myGame.playNext(myGamePlayerTwo, 0);
+		response = gameService.playGameStep(myGamePlayerTwo, 0, myGame.getGameName()).get(0);  //myGame.playNext(myGamePlayerTwo, 0);
 		validateCommonGameOfThreeBehaviour(myGame, myGamePlayerOne.getName(), 2, 1, false);
-		validateGameOfThreeStepResponse(response, 2, 0);
+		validateGameOfThreeStepResponse(response,myGamePlayerTwo.getName(), 2, 0);
 
 		// step from 2 to 0 action 1 next proposal contains is not relevant
-		response = myGame.playNext(myGamePlayerOne, 1);
+		response = gameService.playGameStep(myGamePlayerOne, 1, myGame.getGameName()).get(0);  //myGame.playNext(myGamePlayerOne, 1);
 		validateCommonGameOfThreeBehaviour(myGame, myGamePlayerTwo.getName(), 1, -1, true);
-		validateGameOfThreeStepResponse(response, 1, 1);
+		validateGameOfThreeStepResponse(response,myGamePlayerOne.getName(), 1, 1);
 
 		// step after game is ended
 		try {
-			response = myGame.playNext(myGamePlayerOne, 1);
+			response = gameService.playGameStep(myGamePlayerOne, 1, myGame.getGameName()).get(0);  //myGame.playNext(myGamePlayerOne, 1);
 			fail("Game is already ended, exception is epected! ");
 		} catch (IllegalStateException e) {
 			Assert.assertEquals("Game is already done! Winner is PlayerOne", e.getMessage());
@@ -165,8 +164,9 @@ public class GameOfThreeGameControllerTest {
 		Assert.assertEquals("Game state is not as expected ", expectedGameState, myGame.getCurrentGameState());
 	}
 
-	private void validateGameOfThreeStepResponse(GameOfThreeStepResponse responseToValidate, int expectedState,
+	private void validateGameOfThreeStepResponse( GameOfThreeStepResponse responseToValidate,String expectedPlayerName, int expectedState,
 			int takenStepValue) {
+		Assert.assertEquals("Invalid playerName in result!", expectedPlayerName, responseToValidate.getPlayerName());
 		Assert.assertEquals("Invalid game state in result!", expectedState, responseToValidate.getGameState());
 		Assert.assertEquals("Invalid taken last step in result!", takenStepValue, responseToValidate.getStepValue());
 	}

@@ -16,6 +16,7 @@ public class GameOfThreePlayer {
 	public GameOfThreePlayer(String playerName, boolean isAutomaticPlayer) {
 		this.playerName = playerName;
 		this.isAutomaticPlayer = isAutomaticPlayer;
+		this.playStepHistory=new LinkedList<>();
 	}
 
 	public String getName() {
